@@ -8,6 +8,8 @@ let giftInputField = document.getElementById('gift')
 let forInputField = document.getElementById('for')
 let priceInputField = document.getElementById('price')
 
+let currentGift = null;
+
 const loadGifts = async () => {
     let response = await fetch(baseUrl)
     let data  = await response.json()
@@ -39,12 +41,26 @@ const loadGifts = async () => {
         changeBtn.setAttribute('class', 'change-btn')
         changeBtn.textContent = 'Change'
 
+        changeBtn.addEventListener('click', async () => {
+           
+            giftInputField.value = gift
+            forInputField.value = forWho
+            priceInputField.value = price
+
+            currentGift = _id;
+
+            addBtnElement.disabled = true
+            editBtnElement.disabled = false
+
+            changeBtn.parentElement.parentElement.remove()
+        })
+
         let deleteBtn = document.createElement('button')
         deleteBtn.setAttribute('class', 'delete-btn')
         deleteBtn.textContent = 'Delete'
 
         deleteBtn.addEventListener('click', async () => {
-            const response = await fetch(`${baseUrl}/${_id}`, {
+            const response = await fetch(`${baseUrl}${_id}`, {
                 method: 'DELETE'
             });
 
@@ -89,4 +105,31 @@ addBtnElement.addEventListener('click', async () => {
     giftInputField.value = ''
     forInputField.value = ''
     priceInputField.value = ''
+})
+
+editBtnElement.addEventListener('click', async () => {
+    let gift = giftInputField.value
+    let forVal = forInputField.value
+    let price = priceInputField.value
+
+    console.log(currentGift)
+
+    const response = await fetch(`${baseUrl}${currentGift}`, {
+        method: 'PUT',
+        headers: {
+            'content-type': 'application/json',
+        },
+        body: JSON.stringify({_id: currentGift ,gift, for: forVal, price}),
+    })
+
+    loadGifts();
+
+    addBtnElement.disabled = false
+    editBtnElement.disabled = true
+
+    giftInputField.value = ''
+    forInputField.value = ''
+    priceInputField.value = ''
+
+    currentGift = null
 })
